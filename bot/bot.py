@@ -3,6 +3,8 @@ from telebot import types, TeleBot
 from importlib import import_module
 from glob import glob
 from tools.views import View
+from tools.components import Menu
+from apps.test.views import View1
 
 
 class Bot:
@@ -15,32 +17,49 @@ class Bot:
         views_modules = [package.replace("/", ".") for package in glob("apps/**/views")]
         self.__current_view = None
 
+        self._bot.set_my_commands([
+            types.BotCommand("/start", "start")
+        ])
+
+        self._bot.register_message_handler(self.on_start_command, commands=["start"])
+
         for views_module in views_modules:
             module = import_module(views_module)
             for item_name in module.__all__:
                 _View: View = getattr(module, item_name)
                 _View.as_view(self)
 
-    def register_message_handler(self, handler, *args, **kwargs):
-        self._bot.register_message_handler(handler, *args, **kwargs)
+    def on_start_command(self, message: types.Message):
+        self._user = message.from_user
+        self.switch_view(next_view=View1)
 
-    def register_next_step_handler(self, message, callback, *args, **kwargs):
-        self._bot.register_next_step_handler(message, callback, *args, **kwargs)
+    def send_reply_message(self, message: str):
+        self._bot.send_message(chat_id=self._user.id, text=message)
 
-    def register_callback_handler(self, handler, *args, **kwargs):
-        self._bot.register_callback_query_handler(handler, *args, **kwargs)
+    def remove_menu(self, chat_id: Union[str, int], text: str, menu: Menu) -> types.Message:
+        return self._bot.send_message(chat_id=chat_id, text=text, reply_markup=menu.remove())
 
-    def send_message(self, to: Union[str, int], message: str,
-                     reply_markup: Optional[types.InlineKeyboardMarkup] = None):
-        self._bot.send_message(chat_id=to, text=message, reply_markup=reply_markup)
+    def remove_reply_menu(self, text: str, menu: Menu) -> types.Message:
+        return self.remove_menu(chat_id=self._user.id, text=text, menu=menu)
+
+    def send_reply_message_with_menu(self, text: str, menu: Menu) -> types.Message:
+        return self.send_message_with_menu(chat_id=self._user.id, text=text, menu=menu)
+
+    def send_message_with_menu(self, chat_id: Union[str, int], text: str, menu: Menu) -> types.Message:
+        return self._bot.send_message(chat_id=chat_id, text=text, reply_markup=menu.keyboard)
 
     def run(self):
         self._bot.polling(none_stop=True)
 
     def switch_view(self, next_view: Type[View]):
-        self.__current_view.exit()
+        prev_view = None
+        if self.__current_view:
+            instance = self.__current_view.create(self)
+            instance.exit()
+            prev_view = instance
         self.__current_view = next_view
         instance = next_view.create(self)
+        instance.prev_view = prev_view
         instance.entry()
 
     @property
