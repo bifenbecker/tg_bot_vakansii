@@ -1,6 +1,6 @@
 from typing import Union, Type, TYPE_CHECKING, Optional
 from telebot import types
-from .base import View
+from .base_old import View
 
 if TYPE_CHECKING:
     from bot import Bot
