@@ -37,6 +37,7 @@ class ViewLogicMixin(MiddlewareMixinView, ViewStateMixin, SingletonView):
         self._run_middlewares(type=MiddlewaresType.BEFORE_ENTRY, data=data)
         self.pre_entry(data=data)
         self.entry_render(data=data)
+        self._run_middlewares(type=MiddlewaresType.AFTER_ENTRY, data=data)
 
     def exit_render(self):
         """Exit render"""
@@ -46,6 +47,7 @@ class ViewLogicMixin(MiddlewareMixinView, ViewStateMixin, SingletonView):
         """Exit of view"""
         self._run_middlewares(type=MiddlewaresType.BEFORE_EXIT)
         self.exit_render()
+        self._run_middlewares(type=MiddlewaresType.AFTER_EXIT)
 
     @classmethod
     def configurate(cls, instance):

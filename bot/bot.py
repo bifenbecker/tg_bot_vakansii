@@ -1,4 +1,5 @@
 from typing import Optional, Union, Type
+from time import time
 from telebot import types, TeleBot
 from importlib import import_module
 from glob import glob
@@ -28,7 +29,7 @@ class Bot:
             for item_name in module.__all__:
                 _View: View = getattr(module, item_name)
                 instance_view = _View.create(self)
-                instance_view.as_view()
+                instance_view.register_view()
                 # _View.as_view(self)
 
     def on_start_command(self, message: types.Message):

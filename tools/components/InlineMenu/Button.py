@@ -5,15 +5,17 @@ if TYPE_CHECKING:
     from tools.views import View
 
 
-class Button:
+class InlineButton:
     text: str
     data: Optional[dict] = None
+    callback_data: str
     to_view: Optional[Type[View]] = None
     on_click: Union[Callable, str] = None
 
-    def __init__(self, text: str, data: Optional[dict] = None, to_view: Optional[Type[View]] = None,
+    def __init__(self, text: str, callback_data: str, data: Optional[dict] = None, to_view: Optional[Type[View]] = None,
                  on_click: Union[Callable, str] = None):
         self.text = text
+        self.callback_data = callback_data
         self.data = data
         self.to_view = to_view
         self.on_click = on_click

@@ -5,6 +5,7 @@ from .view_types import MiddlewaresType
 class MiddlewaresMeta(type):
     def __new__(cls, name, bases, attrs):
         collected_middlewares: Dict[MiddlewaresType, List[Callable]] = {}
+
         for base in bases:
             if hasattr(base, 'MIDDLEWARES'):
                 sub_middlewares = getattr(base, 'MIDDLEWARES')
