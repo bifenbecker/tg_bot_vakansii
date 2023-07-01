@@ -51,11 +51,16 @@ class View(ViewLogicMixin, ViewBotMixin):
     def _register_handler(self, handler_type, callback: Callable, *args, **kwargs):
         if not callback:
             raise Exception("You must provide callback to register handler")
+
+        def filter_message(message: types.Message):
+            state_flag = self.bot.current_view(message=message).state_id == self.state
+            return state_flag
+
         if hasattr(self.bot.telegram_api, handler_type):
             register_handler = getattr(self.bot.telegram_api, handler_type)
             register_handler(self.as_view(callback),
-                             func=lambda
-                                 message: self.bot.current_view.state_id == self.state, *args, **kwargs)
+                             func=filter_message, *args,
+                             **kwargs)
 
         else:
             raise Exception(f"No such handler type - {handler_type}")

@@ -17,8 +17,8 @@ class SimpleTextView(View):
         ]
     }
 
-    def entry_render_text(self, data):
-        self.bot.send_reply_message(text=self.ENTRY_TEXT)
+    def entry_render_text(self, user, data):
+        self.bot.telegram_api.send_message(chat_id=user.id, text=self.ENTRY_TEXT)
 
     def exit_render_text(self):
         if self.EXIT_TEXT:

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from telebot import types
 from typing import Optional, TYPE_CHECKING
 from .view_state_mixin import ViewStateMixin
 from .signleton_view import SingletonView
@@ -24,30 +25,31 @@ class ViewLogicMixin(MiddlewareMixinView, ViewStateMixin, SingletonView):
     def prev_view(self, view: View):
         self._prev_view = view
 
-    def pre_entry(self, data: Optional[dict] = None):
+    def pre_entry(self, user: types.User, data: Optional[dict] = None):
         """Prepare method for entry render"""
         pass
 
-    def entry_render(self, data: Optional[dict] = None):
+    def entry_render(self, user: types.User, data: Optional[dict] = None):
         """Entry render"""
         pass
 
-    def entry(self, data: Optional[dict] = None):
+    def entry(self, user: types.User, data: Optional[dict] = None):
         """Entry"""
-        self._run_middlewares(type=MiddlewaresType.BEFORE_ENTRY, data=data)
-        self.pre_entry(data=data)
-        self.entry_render(data=data)
-        self._run_middlewares(type=MiddlewaresType.AFTER_ENTRY, data=data)
+        # TODO: Edit middlewares args required
+        self._run_middlewares(type=MiddlewaresType.BEFORE_ENTRY, user=user, data=data)
+        self.pre_entry(user=user, data=data)
+        self.entry_render(user=user, data=data)
+        self._run_middlewares(type=MiddlewaresType.AFTER_ENTRY, user=user, data=data)
 
-    def exit_render(self):
+    def exit_render(self, user: types.User):
         """Exit render"""
         pass
 
-    def exit(self):
+    def exit(self, user: types.User):
         """Exit of view"""
-        self._run_middlewares(type=MiddlewaresType.BEFORE_EXIT)
-        self.exit_render()
-        self._run_middlewares(type=MiddlewaresType.AFTER_EXIT)
+        self._run_middlewares(type=MiddlewaresType.BEFORE_EXIT, user=user)
+        self.exit_render(user=user)
+        self._run_middlewares(type=MiddlewaresType.AFTER_EXIT, user=user)
 
     @classmethod
     def configurate(cls, instance):

@@ -4,16 +4,11 @@ from tools.components import Menu
 from tools.views import View
 
 
-# class MenuView(View):
 class MenuView(View):
     """Add reply keyboard menu for view"""
-    IS_REMOVE_MENU_AFTER = True
-    MENU: Optional[Menu] = None
-    TEXT_FOR_MENU: str
 
     MIDDLEWARES = {
         View.MiddlewaresType.BEFORE_ENTRY: [
-            "upload_bot_to_menu",
             "preprocess_buttons",
             "render_entry_menu"
         ],
@@ -22,11 +17,8 @@ class MenuView(View):
         ],
     }
 
-    def upload_bot_to_menu(self, data: Optional[dict] = None):
-        self.MENU.bot = self.bot
-
-    def preprocess_buttons(self, data: Optional[dict] = None):
-        for button in self.MENU.buttons:
+    def preprocess_buttons(self, user: types.User, data: Optional[dict] = None):
+        for button in self.configure_menu(user=user).buttons:
             if str_on_click_handler := button.on_click:
                 if hasattr(self, str_on_click_handler):
                     func_on_click_handler = getattr(self, str_on_click_handler)
@@ -34,24 +26,35 @@ class MenuView(View):
                 else:
                     raise Exception("No such handler for button")
 
-    def render_entry_menu(self, data: Optional[dict] = None):
-        self.menu_message = self.bot.send_reply_message_with_menu(text=self.TEXT_FOR_MENU, menu=self.MENU)
+    def configure_menu(self, user: types.User) -> Menu:
+        raise NotImplementedError()
+
+    def text_for_menu(self, user: types.User) -> str:
+        raise NotImplementedError()
+
+    def render_entry_menu(self, user: types.User, data: Optional[dict] = None):
+        self.menu_message = self.bot.send_message_with_menu(chat_id=user.id, text=self.text_for_menu(user=user),
+                                                            menu=self.configure_menu(user=user))
 
     def on_click_button_menu(self, handle_obj: types.Message):
-        for button in self.MENU.buttons:
+        menu = self.configure_menu(user=handle_obj.from_user)
+        for button in menu.buttons:
             if button.text == handle_obj.text:
-                button.action(switch_view=self.bot.switch_view)
-
-    def exit(self):
-        if self.IS_REMOVE_MENU_AFTER:
-            self.bot.remove_menu(menu=self.MENU)
+                menu.action(button=button)
 
 # Example
 # class View1(MessageHandler, MenuView):
-#     TEXT_FOR_MENU = "Hello"
-#     MENU = Menu(
-#         Button("btn1")
-#     )
+#     def configure_menu(self, user: types.User) -> Menu:
+#         menu = Menu(
+#             Button("Test", to_view=View2)
+#         ).options(
+#             user=user,
+#             bot=self.bot
+#         )
+#         return menu
+#
+#     def text_for_menu(self, user: types.User) -> str:
+#         return "Test"
 #
 #     def message_handler(self, message: types.Message):
 #         print(message)
