@@ -6,9 +6,9 @@ from .view_manager import ViewManager
 
 class QueueViewManager(ViewManager):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, max_len: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._queue: queue.LifoQueue[Type[View]] = queue.LifoQueue()
+        self._queue: queue.LifoQueue[Type[View]] = queue.LifoQueue(maxsize=max_len)
         if self._current_view:
             self._queue.put(item=self._current_view)
 

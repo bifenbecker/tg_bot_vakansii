@@ -10,9 +10,10 @@ if TYPE_CHECKING:
 
 class ViewManager(ABC):
 
-    def __init__(self, bot: Bot, user: types.User, init_view: Optional[Type[View]] = None):
+    def __init__(self, bot: Bot, user: Optional[types.User] = None, init_view: Optional[Type[View]] = None, *args,
+                 **kwargs):
         self.bot = bot
-        self.user = user
+        self.user: Optional[types.User] = user
         self._current_view: Type[View] = init_view
 
     def _get_current_view(self) -> Type[View]:
@@ -34,3 +35,7 @@ class ViewManager(ABC):
     @abstractmethod
     def back_view(self, data: Optional[dict] = None, exit_view: bool = True, entry_view: bool = True):
         pass
+
+    @classmethod
+    def fabric(cls, view_manager_type: Type[ViewManager], *args, **kwargs) -> ViewManager:
+        return view_manager_type(*args, **kwargs)

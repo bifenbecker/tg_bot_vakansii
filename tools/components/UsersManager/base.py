@@ -19,8 +19,9 @@ class BaseUsersManager(ABC):
     def view_manager(self) -> Type[ViewManager]:
         return self.__default_view_manager_type
 
-    def _create_view_manager_for_user(self, user: types.User, init_view: Optional[Type[View]] = None) -> ViewManager:
-        return self.view_manager(bot=self.bot, user=user, init_view=init_view)
+    def _create_view_manager_for_user(self, user: types.User, init_view: Optional[Type[View]] = None, *args,
+                                      **kwargs) -> ViewManager:
+        return self.view_manager(bot=self.bot, user=user, init_view=init_view, *args, **kwargs)
 
     @abstractmethod
     def get_view_manager(self, user: types.User) -> ViewManager:

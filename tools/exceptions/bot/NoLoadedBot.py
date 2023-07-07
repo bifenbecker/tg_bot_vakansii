@@ -1,0 +1,2 @@
+class NoLoadedBot(Exception):
+    pass

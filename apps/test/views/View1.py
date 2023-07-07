@@ -26,5 +26,5 @@ class View1(MenuView, MessageHandler):
     def text_for_menu(self, user: types.User) -> str:
         return "Test"
 
-    def message_handler(self, message: types.Message):
-        print(message)
+    # def message_handler(self, message: types.Message):
+    #     print(message)

@@ -1,24 +1,19 @@
-from time import sleep
 from typing import Optional, Union, Type
 from telebot import types, TeleBot
-from importlib import import_module
-from glob import glob
 from tools.views import View
-from tools.components import Menu, InlineKeyboard, ViewManager, HashMapUsersManager
+from tools.components import Menu, InlineKeyboard, ViewManager, DatabaseViewManager, \
+    DatabaseUsersManager
+from tools.exceptions.bot import BotRunException
 from apps.test.views import View1
-
-import logging
-
-logging.basicConfig()
-logger = logging.getLogger(__name__)
+from core import logger, settings, ViewsInternalService
 
 
 class Bot:
 
     def __init__(self, token: str, *args, **kwargs):
         self._bot: TeleBot = TeleBot(token=token, *args, **kwargs)
-        views_modules = [package.replace("/", ".") for package in glob("apps/**/views")]
-        self.users_manager = HashMapUsersManager(bot=self, view_manager_type=ViewManager.QueueViewManager)
+        self.users_manager = DatabaseUsersManager(bot=self,
+                                                  view_manager_type=DatabaseViewManager)
 
         self._bot.set_my_commands([
             types.BotCommand("/start", "start")
@@ -26,12 +21,7 @@ class Bot:
 
         self._bot.register_message_handler(self.on_start_command, commands=["start"])
 
-        for views_module in views_modules:
-            module = import_module(views_module)
-            for item_name in module.__all__:
-                _View: View = getattr(module, item_name)
-                instance_view = _View.create(self)
-                instance_view.register_view()
+        ViewsInternalService.register_views(bot=self)
 
     def on_start_command(self, message: types.Message):
         self.users_manager.add_user(user=message.from_user)
@@ -56,7 +46,11 @@ class Bot:
         return self._bot.send_message(chat_id=chat_id, text=text, reply_markup=inline_keyboard.keyboard)
 
     def run(self):
-        self._bot.polling(none_stop=True, skip_pending=True)
+        try:
+            logger.info(f"Bot starting. Skip pending = {settings.SKIP_PENDING}")
+            self._bot.polling(none_stop=True, skip_pending=settings.SKIP_PENDING)
+        except Exception as e:
+            raise BotRunException(f"Bot start failed. Error message: {e}")
 
     def switch_view(self, user: types.User, next_view: Type[View], exit_view: bool = True,
                     data_to_next_view: Optional[dict] = None,

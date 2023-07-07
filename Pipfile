@@ -4,8 +4,21 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+alembic = "*"
+python-dotenv = "*"
+sqlalchemy = "*"
+dependency-injector = "*"
+loguru = "*"
+pydantic = {extras = ["dotenv"], version = "*"}
+pydantic-settings = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.10"
+
+[scripts]
+start = "python main.py"
+migrate = "alembic upgrade head"
+manual_makemigrations = "alembic revision -m"
+makemigrations = "alembic revision --autogenerate"

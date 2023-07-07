@@ -1,12 +1,25 @@
 from __future__ import annotations
+from tools.exceptions.bot import BotRunException
+from core import logger
+from core import settings
 from bot import Bot
 
 
-
+@logger.catch
 def main():
-    bot = Bot(token="6153583969:AAHV2N4yv_WkB9iQogDyeXjYKaT4nz1k638")
-    bot.run()
+    try:
+        bot = Bot(token=settings.TG_TOKEN)
+        bot.run()
+    except BotRunException as error:
+        logger.exception(error)
+    except Exception:
+        raise
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        logger.info("Stop running bot")
+    except Exception as e:
+        logger.exception(e)
