@@ -16,13 +16,14 @@ class MultiHandlerView(View, HandlerMixin):
         pinned_message, web_app_data
     """
 
-    def __register_file_type_handler(self, file_types: List[str], handler: Callable,  *args, **kwargs):
+    def __register_file_type_handler(self, file_types: List[str], handler: Callable, *args, **kwargs):
         self._register_handler("register_message_handler", handler,
                                content_types=file_types,
                                *args, **kwargs)
 
     def __register_message_handler(self, *args, **kwargs):
-        self._register_handler("register_message_handler", self.message_handler, content_types=['text'], *args,
+        self._register_handler("register_message_handler", self._get_message_handler(bot=self.bot),
+                               content_types=['text'], *args,
                                **kwargs)
 
     def __register_callback_handler(self, *args, **kwargs):

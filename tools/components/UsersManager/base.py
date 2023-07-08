@@ -33,9 +33,10 @@ class BaseUsersManager(ABC):
 
     def switch_view_for_user(self, user: types.User, next_view: Type[View], data: Optional[dict] = None,
                              exit_view: bool = True,
-                             entry_view: bool = True):
+                             entry_view: bool = True, *args, **kwargs):
         view_manager_for_user = self.get_view_manager(user=user)
-        view_manager_for_user.switch_view(next_view=next_view, data=data, entry_view=entry_view, exit_view=exit_view)
+        view_manager_for_user.switch_view(next_view=next_view, data=data, entry_view=entry_view, exit_view=exit_view,
+                                          *args, **kwargs)
 
     def back_view_for_user(self, user: types.User, data: Optional[dict] = None,
                            exit_view: bool = True,

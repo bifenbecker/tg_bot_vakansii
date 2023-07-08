@@ -1,19 +1,24 @@
 from typing import Optional, Union, Type
 from telebot import types, TeleBot
+from telebot.storage import StateMemoryStorage
 from tools.views import View
 from tools.components import Menu, InlineKeyboard, ViewManager, DatabaseViewManager, \
-    DatabaseUsersManager
+    DatabaseUsersManager, SimpleViewManager, HashMapUsersManager
 from tools.exceptions.bot import BotRunException
 from apps.test.views import View1
 from core import logger, settings, ViewsInternalService
+from apps.test.forms.example_form import ExampleForm
+from apps.test.views.FormStep0View import Step0
 
 
 class Bot:
 
     def __init__(self, token: str, *args, **kwargs):
         self._bot: TeleBot = TeleBot(token=token, *args, **kwargs)
-        self.users_manager = DatabaseUsersManager(bot=self,
-                                                  view_manager_type=DatabaseViewManager)
+        # self.users_manager = DatabaseUsersManager(bot=self,
+        #                                           view_manager_type=DatabaseViewManager)
+        self.users_manager = HashMapUsersManager(bot=self,
+                                                 view_manager_type=SimpleViewManager)
 
         self._bot.set_my_commands([
             types.BotCommand("/start", "start")
@@ -25,7 +30,8 @@ class Bot:
 
     def on_start_command(self, message: types.Message):
         self.users_manager.add_user(user=message.from_user)
-        self.switch_view(user=message.from_user, next_view=View1)
+        form = ExampleForm(storage=StateMemoryStorage(), bot=self, user=message.from_user)
+        form.entry()
 
     def delete_message(self, chat_id: Union[str, int], message_id: Union[str, int],
                        timeout: Optional[int] = None) -> bool:
@@ -54,9 +60,9 @@ class Bot:
 
     def switch_view(self, user: types.User, next_view: Type[View], exit_view: bool = True,
                     data_to_next_view: Optional[dict] = None,
-                    entry_view: bool = True):
+                    entry_view: bool = True, *args, **kwargs):
         self.users_manager.switch_view_for_user(user=user, next_view=next_view, data=data_to_next_view,
-                                                exit_view=exit_view, entry_view=entry_view)
+                                                exit_view=exit_view, entry_view=entry_view, *args, **kwargs)
 
     def back_view(self, user: types.User, data: Optional[dict] = None, exit_view: bool = True, entry_view: bool = True):
         self.users_manager.back_view_for_user(user=user, data=data, exit_view=exit_view, entry_view=entry_view)

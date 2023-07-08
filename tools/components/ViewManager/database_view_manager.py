@@ -46,7 +46,7 @@ class DatabaseViewManager(ViewManager):
         raise NotImplementedError()
 
     def switch_view(self, next_view: Type[View], data: Optional[dict] = None, exit_view: bool = True,
-                    entry_view: bool = True):
+                    entry_view: bool = True, *args, **kwargs):
         prev_view = None
         if self.current_view:
             prev_view = self.current_view_instance

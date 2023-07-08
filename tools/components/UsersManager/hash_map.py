@@ -19,3 +19,4 @@ class HashMapUsersManager(BaseUsersManager):
         self.__users_hash_map.update({
             user.id: self._create_view_manager_for_user(user=user, init_view=init_view_for_user)
         })
+

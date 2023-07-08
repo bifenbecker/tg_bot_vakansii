@@ -18,15 +18,15 @@ class SimpleViewManager(ViewManager):
         return self._prev_view.create(self.bot)
 
     def switch_view(self, next_view: Type[View], data: Optional[dict] = None, exit_view: bool = True,
-                    entry_view: bool = True):
+                    entry_view: bool = True, *args, **kwargs):
         prev_view = None
         if self._current_view:
-            instance = self._current_view.create(self)
+            instance = self._current_view.get_instance()
             if exit_view:
                 instance.exit(user=self.user)
             prev_view = instance
         self._current_view = next_view
-        instance = next_view.create(self)
+        instance = next_view.get_instance()
         instance.prev_view = prev_view
         self._prev_view = prev_view.__class__
         if entry_view:

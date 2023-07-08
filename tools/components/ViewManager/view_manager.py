@@ -23,13 +23,16 @@ class ViewManager(ABC):
     def current_view(self) -> Type[View]:
         return self._get_current_view()
 
+    def create_view_instance(self, *args, **kwargs):
+        self.current_view.create(*args, **kwargs)
+
     @property
     def current_view_instance(self) -> View:
-        return self.current_view.create(self.bot)
+        return self.current_view.get_instance()
 
     @abstractmethod
     def switch_view(self, next_view: Type[View], data: Optional[dict] = None, exit_view: bool = True,
-                    entry_view: bool = True):
+                    entry_view: bool = True, *args, **kwargs):
         pass
 
     @abstractmethod

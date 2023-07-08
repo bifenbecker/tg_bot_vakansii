@@ -17,29 +17,29 @@ class QueueViewManager(ViewManager):
         if not self._queue.empty():
             return self._queue.queue[-1]
 
-    @property
-    def current_view_instance(self) -> View:
-        return self._queue.queue[-1].create(self.bot)
+    def get_current_view_instance(self, *args, **kwargs) -> View:
+        return self._queue.queue[-1].create(self.bot, *args, **kwargs)
 
     @property
     def list_views(self) -> List[Type[View]]:
         return self._queue.queue
 
-    def switch_view(self, next_view: Type[View], data: Optional[dict] = None, exit_view: bool = True, entry_view: bool = True):
+    def switch_view(self, next_view: Type[View], data: Optional[dict] = None, exit_view: bool = True, entry_view: bool = True, *args, **kwargs):
         prev_view = None
         if self.current_view:
             prev_view = self.current_view_instance
             if exit_view:
                 self.current_view_instance.exit(user=self.user)
         self._queue.put(item=next_view)
-        self.current_view_instance.prev_view = prev_view
+        current_view_instance = self.create_view_instance(*args, **kwargs)
+        current_view_instance.prev_view = prev_view
         if entry_view:
-            self.current_view_instance.entry(user=self.user, data=data)
+            current_view_instance.entry(user=self.user, data=data)
 
     def back_view(self, data: Optional[dict] = None, exit_view: bool = True, entry_view: bool = True):
         view = self._queue.get().create(self.bot)
         if exit_view:
             view.exit(user=self.user)
         if entry_view:
-            self.current_view_instance.entry(user=self.user, data=data)
+            self.get_current_view_instance().entry(user=self.user, data=data)
 

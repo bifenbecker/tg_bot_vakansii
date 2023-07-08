@@ -19,5 +19,14 @@ class SingletonView:
         return instance
 
     @classmethod
-    def configurate(cls, instance):
+    @property
+    def is_created(cls) -> bool:
+        return bool(cls._instance)
+
+    @classmethod
+    def get_instance(cls) -> Optional[View]:
+        return cls._instance
+
+    @classmethod
+    def configurate(cls, instance: View):
         pass

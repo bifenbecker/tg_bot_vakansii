@@ -43,7 +43,7 @@ class ViewsInternalService(BaseImportService):
         cls.__bot = bot
         for view_type in views:
             _View: Type[View] = view_type['value']
-            instance_view = _View.create(bot)
+            instance_view = _View.create(bot=bot)
             instance_view.register_view()
 
         cls.__generate_hash_map(views=views)

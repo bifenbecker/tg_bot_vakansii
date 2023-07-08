@@ -25,8 +25,6 @@ class View(ViewLogicMixin, ViewBotMixin):
 
     def as_view(self, handler: Callable) -> Callable:
         def process_handler(handle_obj: Union[types.Message, types.CallbackQuery], *args, **kwargs):
-            self._handle_obj = handle_obj
-            self.bot.user = handle_obj.from_user
             self._run_middlewares(type=MiddlewaresType.BEFORE_HANDLER, handle_obj=handle_obj, *args, **kwargs)
             self.pre_handler(handle_obj=handle_obj)
             handler(handle_obj, *args, **kwargs)
@@ -37,8 +35,6 @@ class View(ViewLogicMixin, ViewBotMixin):
 
     def view(self, handle_obj: Union[types.Message, types.CallbackQuery]):
         """Handler ov view"""
-        self._handle_obj = handle_obj
-        self.bot.user = handle_obj.from_user
         self._run_middlewares(type=MiddlewaresType.BEFORE_HANDLER, handle_obj=handle_obj)
         self._handlers(handle_obj=handle_obj)
         self._run_middlewares(type=MiddlewaresType.AFTER_HANDLER, handle_obj=handle_obj)
